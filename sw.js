@@ -1,5 +1,5 @@
 // Network first, cache as fallback: updates show up right away, and the app still opens offline.
-const CACHE = "word-test-v1";
+const CACHE = "word-test-v2";
 const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {

@@ -122,6 +122,25 @@ let store={wrong:{},last:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")store={wrong:s.wrong||{},last:s.last||{}}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 
+const SHEET_URL="https://script.google.com/macros/s/AKfycbxTPy0jcnacJhACZGrLmvwKITYCkvfO_6dKUhxpl7bohNRkkXICNMHp3i-ttRyl7r2Dnw/exec";
+const QKEY="vt-l78-queue";
+const readQ=()=>{try{const q=JSON.parse(localStorage.getItem(QKEY)||"[]");return Array.isArray(q)?q:[]}catch(e){return[]}};
+const writeQ=q=>{try{localStorage.setItem(QKEY,JSON.stringify(q.slice(-50)))}catch(e){}};
+let flushing=false;
+async function flush(){
+  if(!SHEET_URL||flushing)return;flushing=true;
+  let q=readQ();
+  while(q.length){
+    try{await fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(q[0])})}catch(e){break}
+    q.shift();writeQ(q);
+  }
+  flushing=false;
+}
+function report(mode,score,total,wrong){
+  const deck=(S.deck==="wrong"?"오답노트":DECKS[S.deck].name)+(S.irr&&(S.deck==="past"||S.deck==="comp")?" (불규칙만)":"");
+  const q=readQ();q.push({t:Date.now(),deck,mode,score,total,wrong});writeQ(q);flush();
+}
+const label=it=>it.en?it.en+" ("+it.ko+")":it.base+" → "+it.form;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const norm=s=>String(s).toLowerCase().replace(/[’‘]/g,"'").replace(/[.!?,]/g,"").replace(/\s+/g," ").trim();
@@ -197,7 +216,7 @@ function viewHome(){
   <div class="lab">개수</div>
   <div class="seg" data-g="count">${[[10,"10개"],[20,"20개"],[0,"전체"]].map(([v,t])=>`<button data-v="${v}" aria-pressed="${S.count===v}">${t}</button>`).join("")}</div>
   ${S.deck==="past"||S.deck==="comp"?`<label class="tog"><input type="checkbox" id="irr" ${S.irr?"checked":""}> ★ 불규칙만 연습하기</label>`:""}
-  <p class="note">기록과 오답노트는 이 휴대폰 브라우저에만 저장돼요.</p>
+  <p class="note">테스트 결과는 선생님께 자동으로 전달돼요.</p>
   <div class="bar"><button class="big" id="go">${S.mode==="study"?"카드 넘기기 시작":"테스트 시작"}</button></div>`;
 }
 function cardFace(it){
@@ -251,12 +270,16 @@ function answer(given){
 }
 function next(){
   if(S.i+1<S.qs.length){S.i++;render();const a=document.getElementById("ans");if(a)a.focus()}
-  else{const ok=S.res.filter(r=>r.ok).length;store.last[S.deck]={s:ok,t:S.res.length,d:Date.now()};save();S.view="result";render();scrollTo(0,0)}
+  else{const ok=S.res.filter(r=>r.ok).length;store.last[S.deck]={s:ok,t:S.res.length,d:Date.now()};save();
+    report("테스트",ok,S.res.length,S.res.filter(r=>!r.ok).map(r=>({w:label(r.q.it),d:DECKS[r.q.it.deck].name,g:r.q.type==="type"?(r.given||"빈칸"):r.given})));
+    S.view="result";render();scrollTo(0,0)}
 }
 function studyMark(known){
   const it=S.cards[S.i];
   if(known)S.known++;else{S.unknown.push(it);store.wrong[it.id]=(store.wrong[it.id]||0)+1;save()}
-  S.i++;S.flip=false;render();
+  S.i++;S.flip=false;
+  if(S.i>=S.cards.length)report("카드 학습",S.known,S.cards.length,S.unknown.map(x=>({w:label(x),d:DECKS[x.deck].name,g:"몰라요"})));
+  render();
 }
 
 function render(){
@@ -300,6 +323,8 @@ document.addEventListener("keydown",e=>{
   }
 });
 render();
+flush();
+window.addEventListener("online",flush);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
 </script>
