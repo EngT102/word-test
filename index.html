@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2340ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="단어 테스트">
+<title>L7–8 단어 테스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday study tool for a middle-schooler: cheerful, clear, thumb-first
+   IDEA a ring-bound word card deck (단어 링카드) flipped with one thumb
+   PICTURE the current card, large, with binder holes; on home the four deck cards
+   COLOUR white ground, cobalt band, pale cobalt panels, coral accent; green/red only for right/wrong
+   TYPE Jua display + Noto Sans KR text
+   LAYOUT one centered 520px column; phone: band title, card, sticky action bar */
+:root{--bg:#ffffff;--ink:#10163a;--soft:#5a6188;--band:#2340ff;--panel:#eef1ff;--line:#d5dbff;--card:#ffffff;--blue:#2340ff;--acc:#ff5b3a;--ok:#0f9d63;--okbg:#e3f7ee;--bad:#e2412a;--badbg:#ffe9e4;--shadow:0 2px 0 #d5dbff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0d1236;--ink:#f2f4ff;--soft:#aab2e0;--band:#1b2a9e;--panel:#18205a;--line:#2b3680;--card:#1f2866;--blue:#8fa2ff;--ok:#3fd497;--okbg:#123d3a;--bad:#ff7a62;--badbg:#45203a;--shadow:0 2px 0 #0a0e2b}}
+:root[data-theme=dark]{--bg:#0d1236;--ink:#f2f4ff;--soft:#aab2e0;--band:#1b2a9e;--panel:#18205a;--line:#2b3680;--card:#1f2866;--blue:#8fa2ff;--ok:#3fd497;--okbg:#123d3a;--bad:#ff7a62;--badbg:#45203a;--shadow:0 2px 0 #0a0e2b}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.top{background:var(--band);color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 58px max(16px,env(safe-area-inset-left,0px))}
+.top div{max-width:520px;margin:0 auto}
+.top h1{font:400 clamp(30px,8vw,40px)/1.05 Jua,"Noto Sans KR",sans-serif;margin:0;letter-spacing:-.01em}
+.top p{margin:6px 0 0;opacity:.85;font-size:14px}
+.wrap{max-width:520px;margin:-40px auto 0;padding:0 16px 24px}
+.decks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.deck{position:relative;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:26px 14px 14px;box-shadow:var(--shadow);min-height:132px;display:flex;flex-direction:column;gap:2px}
+.deck::before,.ring::before{content:"";position:absolute;top:10px;left:50%;width:44px;height:8px;margin-left:-22px;background:radial-gradient(circle,var(--line) 3.5px,transparent 4px) 0 0/22px 8px repeat-x}
+.deck b{font:400 21px/1.15 Jua,sans-serif}
+.deck small{color:var(--soft);font-size:13px}
+.deck .last{margin-top:auto;font-size:13px;color:var(--blue);font-weight:700}
+.deck[aria-pressed=true]{border-color:var(--blue);background:var(--panel)}
+.deck.wrong{grid-column:1/-1;min-height:0;flex-direction:row;align-items:center;justify-content:space-between;padding:22px 16px 14px}
+.deck.wrong b{color:var(--acc)}
+.deck:disabled{opacity:.55;cursor:default}
+.lab{font-weight:700;font-size:14px;margin:22px 0 8px}
+.seg{display:flex;background:var(--panel);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;min-height:44px;border-radius:10px;font-weight:700;color:var(--soft)}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--blue);box-shadow:var(--shadow)}
+.tog{display:flex;align-items:center;gap:10px;margin-top:14px;min-height:44px;font-weight:500}
+.tog input{width:22px;height:22px;accent-color:var(--blue)}
+.note{color:var(--soft);font-size:13px;margin:18px 0 0}
+.bar{position:sticky;bottom:0;margin:22px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);display:flex;gap:10px}
+.big{flex:1;min-height:56px;border-radius:16px;background:var(--blue);color:#fff;font:400 22px/1 Jua,sans-serif}
+.big.alt{background:var(--panel);color:var(--ink)}
+.big.no{background:var(--badbg);color:var(--bad)}
+.big:disabled{opacity:.45}
+.head{display:flex;align-items:center;gap:10px;color:#fff;margin-top:-6px;margin-bottom:12px}
+.head button{min-height:44px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-weight:700}
+.head span{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.prog{height:8px;border-radius:8px;background:var(--panel);overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--acc);border-radius:8px;transition:width .3s}
+.flash{perspective:1200px;touch-action:pan-y;user-select:none}
+.inner{position:relative;height:clamp(260px,52svh,360px);transition:transform .45s;transform-style:preserve-3d}
+.flash.on .inner{transform:rotateY(180deg)}
+.face,.ring{position:relative;background:var(--card);border:2px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 18px 18px}
+.face::before{content:"";position:absolute;top:12px;left:50%;width:66px;height:10px;margin-left:-33px;background:radial-gradient(circle,var(--line) 4.5px,transparent 5px) 0 0/22px 10px repeat-x}
+.face.back{transform:rotateY(180deg);background:var(--panel)}
+.w{font:400 clamp(34px,10vw,52px)/1.08 Jua,sans-serif;overflow-wrap:anywhere;text-wrap:balance}
+.k{font-size:18px;color:var(--soft);margin-top:8px}
+.tip{position:absolute;bottom:14px;left:0;right:0;font-size:13px;color:var(--soft)}
+.say{margin-top:14px;min-height:44px;padding:0 16px;border-radius:22px;background:var(--panel);color:var(--blue);font-weight:700}
+.ring{padding:30px 18px 20px;text-align:center}
+.kind{display:inline-block;font-size:13px;font-weight:700;color:var(--acc);margin-bottom:6px}
+.hint{font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;color:var(--soft);margin-top:8px;font-size:15px}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{min-height:58px;border-radius:16px;background:var(--card);border:2px solid var(--line);font-size:18px;font-weight:500;padding:10px 12px;overflow-wrap:anywhere}
+.opt.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok);font-weight:700}
+.opt.bad{border-color:var(--bad);background:var(--badbg);color:var(--bad);text-decoration:line-through}
+.ans{width:100%;margin-top:14px;min-height:58px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:500 20px/1.2 "Noto Sans KR",sans-serif;padding:0 16px;text-align:center}
+.ans.ok{border-color:var(--ok);background:var(--okbg)}
+.ans.bad{border-color:var(--bad);background:var(--badbg)}
+.fb{margin-top:12px;border-radius:16px;padding:12px 14px;font-weight:500}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.bad{background:var(--badbg);color:var(--bad)}
+.fb b{font-size:18px}
+.fb small{display:block;color:var(--ink);opacity:.8;font-weight:400;margin-top:2px}
+.score{display:flex;align-items:center;gap:18px}
+.score svg{width:132px;height:132px;flex:none}
+.score h2{font:400 30px/1.1 Jua,sans-serif;margin:0}
+.score p{margin:6px 0 0;color:var(--soft)}
+.list{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.list li{background:var(--panel);border-radius:14px;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.list b{color:var(--ok)}
+.list s{color:var(--bad)}
+@media (prefers-reduced-motion:reduce){.inner,.prog i{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div><h1>L7–8 단어 테스트</h1><p>동아출판(이병민) 중1 · Lesson 7–8</p></div></header>
+<main class="wrap" id="app"></main>
+<script>
+{
+const L7=[["artist","화가"],["self-portrait","자화상"],["Dutch","네덜란드의"],["famous","유명한"],["lifetime","일생, 평생"],["move","이사하다"],["model","모델"],["expensive","비싼"],["different","다른"],["bright","밝은"],["Mexican","멕시코의"],["sick","아픈"],["weak","약한"],["strong","강한"],["get well","(병이) 낫다"],["terrible","끔찍한"],["accident","사고"],["hospital","병원"],["reason","이유"],["in common","공통으로"],["touch","(마음을) 움직이다"],["heart","마음, 심장"],["anyone","누구, 누구나"],["paint","그리다"]];
+const L8=[["grade","학년"],["meaning","의미, 뜻"],["agree","동의하다"],["on the way home","집에 가는 길에"],["pick up","줍다"],["idea","생각, 아이디어"],["classmate","반 친구"],["borrow","빌리다"],["real","진짜의"],["too late","너무 늦은"],["letter","편지"],["send","보내다"],["graduate","졸업하다"],["forget","잊다"],["receive","받다"],["package","소포"],["dictionary","사전"],["believe","믿다"],["congratulations","축하해"],["side","편"],["beginning","처음, 시작"],["role","역할"],["understand","이해하다"],["whole","전체의"],["country","나라"]];
+const PAST=[["be (am, is)","was","~이다, 있다",1,["is","were","beed"]],["be (are)","were","~이다, 있다",1,["are","was","beed"]],["paint","painted","그리다"],["move","moved","이사하다"],["want","wanted","원하다"],["think","thought","생각하다",1],["start","started","시작하다"],["become","became","~이 되다",1],["stay","stayed","머무르다"],["say","said","말하다",1],["ask","asked","묻다"],["answer","answered","대답하다"],["agree","agreed","동의하다"],["see","saw","보다",1],["pick","picked","줍다"],["have","had","가지다",1],["tell","told","말하다, 알려 주다",1],["call","called","부르다"],["take","took","가져가다, 꺼내다",1],["write","wrote","쓰다",1],["use","used","사용하다"],["pass","passed","(시간이) 지나다"],["graduate","graduated","졸업하다"],["forget","forgot","잊다",1],["turn","turned","(나이가) ~이 되다"],["receive","received","받다"],["believe","believed","믿다"],["find","found","찾다, 발견하다",1],["can","could","~할 수 있다",1,["canned","cans","can"]],["play","played","놀다, (역할을) 하다"],["get","got","얻다",1],["give","gave","주다",1],["send","sent","보내다",1],["go","went","가다",1],["do","did","하다",1],["make","made","만들다",1],["study","studied","공부하다"],["stop","stopped","멈추다"],["cry","cried","울다"]];
+const COMP=[["bright","brighter","brightest","밝은"],["weak","weaker","weakest","약한"],["strong","stronger","strongest","강한"],["sick","sicker","sickest","아픈"],["long","longer","longest","긴"],["tall","taller","tallest","키가 큰"],["old","older","oldest","나이 든"],["late","later","latest","늦은"],["nice","nicer","nicest","좋은, 멋진"],["large","larger","largest","큰, 넓은"],["pretty","prettier","prettiest","예쁜"],["happy","happier","happiest","행복한"],["heavy","heavier","heaviest","무거운"],["easy","easier","easiest","쉬운"],["big","bigger","biggest","큰"],["hot","hotter","hottest","더운, 뜨거운"],["famous","more famous","most famous","유명한"],["expensive","more expensive","most expensive","비싼"],["different","more different","most different","다른"],["terrible","more terrible","most terrible","끔찍한"],["beautiful","more beautiful","most beautiful","아름다운"],["interesting","more interesting","most interesting","재미있는"],["good","better","best","좋은",1],["bad","worse","worst","나쁜",1],["many / much","more","most","많은",1,["manyer","more many","most"]],["little","less","least","적은",1,["littler","more little","least"]]];
+
+const DECKS={
+  l7:{name:"Lesson 7 단어",sub:"Van Gogh & Kahlo",items:L7.map((r,i)=>({id:"l7-"+i,deck:"l7",en:r[0],ko:r[1]}))},
+  l8:{name:"Lesson 8 단어",sub:"Frindle",items:L8.map((r,i)=>({id:"l8-"+i,deck:"l8",en:r[0],ko:r[1]}))},
+  past:{name:"과거형 동사",sub:"think → thought",items:PAST.map((r,i)=>({id:"pa-"+i,deck:"past",base:r[0],form:r[1],ko:r[2],irr:!!r[3],traps:r[4]}))},
+  comp:{name:"비교급",sub:"bright → brighter",items:COMP.map((r,i)=>({id:"co-"+i,deck:"comp",base:r[0],form:r[1],sup:r[2],ko:r[3],irr:!!r[4],traps:r[5]}))}
+};
+const BYID={};
+for(const k in DECKS)for(const it of DECKS[k].items)BYID[it.id]=it;
+
+const KEY="vt-l78-v1";
+let store={wrong:{},last:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")store={wrong:s.wrong||{},last:s.last||{}}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const norm=s=>String(s).toLowerCase().replace(/[’‘]/g,"'").replace(/[.!?,]/g,"").replace(/\s+/g," ").trim();
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const isVocab=it=>it.deck==="l7"||it.deck==="l8";
+const wrongItems=()=>Object.keys(store.wrong).map(id=>BYID[id]).filter(Boolean);
+
+
+function rule(it){
+  if(isVocab(it))return "";
+  const b=it.base,f=it.form;
+  if(it.irr)return "불규칙 — 통째로 외우기";
+  if(it.deck==="past"){
+    if(f.endsWith("ied"))return "자음+y → y를 i로 바꾸고 +ed";
+    if(f===b+b.slice(-1)+"ed")return "끝 자음을 한 번 더 쓰고 +ed";
+    if(b.endsWith("e"))return "e로 끝나면 +d";
+    if(b.endsWith("y"))return "모음+y → 그냥 +ed";
+    return "대부분 +ed";
+  }
+  if(f.startsWith("more "))return "긴 단어 → more + 원급";
+  if(f.endsWith("ier"))return "자음+y → y를 i로 바꾸고 +er";
+  if(f===b+b.slice(-1)+"er")return "끝 자음을 한 번 더 쓰고 +er";
+  if(b.endsWith("e"))return "e로 끝나면 +r";
+  return "대부분 +er";
+}
+function traps(it){
+  if(it.traps)return it.traps.slice();
+  const b=it.base,f=it.form,c=[];
+  if(it.deck==="past"){c.push(b+"ed");if(it.irr)c.push(f+"ed");if(b.endsWith("y"))c.push(b.slice(0,-1)+"ied");c.push(b+"d",b+"s",b+"ing",b)}
+  else{c.push(b+"er");if(!f.startsWith("more"))c.push("more "+f);c.push("more "+b,it.sup,b)}
+  return [...new Set(c)].filter(x=>x!==f);
+}
+function hintOf(w){return w.split("").map((ch,i)=>i===0||ch===" "||ch==="-"?ch:"_").join(" ")}
+function makeQ(it){
+  const r=Math.random();
+  if(isVocab(it)){
+    const others=shuffle(DECKS[it.deck].items.filter(x=>x.id!==it.id)).slice(0,3);
+    if(r<.4)return{it,type:"mc",label:"뜻 고르기",prompt:it.en,speak:it.en,opts:shuffle([it.ko,...others.map(o=>o.ko)]),ans:it.ko,show:it.en+" = "+it.ko};
+    if(r<.7)return{it,type:"mc",label:"단어 고르기",prompt:it.ko,opts:shuffle([it.en,...others.map(o=>o.en)]),ans:it.en,show:it.ko+" = "+it.en};
+    return{it,type:"type",label:"철자 쓰기",prompt:it.ko,hint:hintOf(it.en),ans:it.en,show:it.ko+" = "+it.en};
+  }
+  const nm=it.deck==="past"?"과거형":"비교급";
+  const show=it.base+" → "+it.form;
+  if(r<.5){const t=traps(it);return{it,type:"mc",label:nm+" 고르기",prompt:it.base,sub:it.ko,opts:shuffle([it.form,t[0],...shuffle(t.slice(1)).slice(0,2)]),ans:it.form,show}}
+  return{it,type:"type",label:nm+" 쓰기",prompt:it.base,sub:it.ko,ans:it.form,show};
+}
+
+const S={view:"home",deck:"l7",mode:"test",count:10,irr:false};
+const app=document.getElementById("app");
+
+function pool(){
+  let items=S.deck==="wrong"?wrongItems():DECKS[S.deck].items.slice();
+  if(S.irr&&(S.deck==="past"||S.deck==="comp"))items=items.filter(x=>x.irr);
+  items=shuffle(items);
+  return S.count?items.slice(0,S.count):items;
+}
+function start(items){
+  if(!items.length)return;
+  if(S.mode==="study"){S.view="study";S.cards=items;S.i=0;S.known=0;S.unknown=[];S.flip=false}
+  else{S.view="quiz";S.qs=items.map(makeQ);S.i=0;S.res=[];S.done=false}
+  render();scrollTo(0,0);
+}
+const head=(n,t)=>`<div class="head"><button id="home">← 홈</button><span>${n} / ${t}</span></div><div class="prog"><i style="width:${Math.round(n/t*100)}%"></i></div>`;
+
+function viewHome(){
+  const wn=wrongItems().length;
+  const deckBtn=k=>{const d=DECKS[k],l=store.last[k];return`<button class="deck" data-deck="${k}" aria-pressed="${S.deck===k}"><b>${d.name}</b><small>${esc(d.sub)} · ${d.items.length}개</small><span class="last">${l?"최근 "+l.s+" / "+l.t:"아직 기록 없음"}</span></button>`};
+  const l=store.last.wrong;
+  return`<div class="decks">${["l7","l8","past","comp"].map(deckBtn).join("")}
+  <button class="deck wrong" data-deck="wrong" aria-pressed="${S.deck==="wrong"}" ${wn?"":"disabled"}><span><b>오답노트</b><br><small>${wn?"틀린 단어 "+wn+"개 · 맞히면 빠져요":"틀린 단어가 여기에 모여요"}</small></span><span class="last">${l?"최근 "+l.s+" / "+l.t:""}</span></button></div>
+  <div class="lab">무엇을 할까요?</div>
+  <div class="seg" data-g="mode"><button data-v="study" aria-pressed="${S.mode==="study"}">카드 학습</button><button data-v="test" aria-pressed="${S.mode==="test"}">테스트</button></div>
+  <div class="lab">개수</div>
+  <div class="seg" data-g="count">${[[10,"10개"],[20,"20개"],[0,"전체"]].map(([v,t])=>`<button data-v="${v}" aria-pressed="${S.count===v}">${t}</button>`).join("")}</div>
+  ${S.deck==="past"||S.deck==="comp"?`<label class="tog"><input type="checkbox" id="irr" ${S.irr?"checked":""}> ★ 불규칙만 연습하기</label>`:""}
+  <p class="note">기록과 오답노트는 이 휴대폰 브라우저에만 저장돼요.</p>
+  <div class="bar"><button class="big" id="go">${S.mode==="study"?"카드 넘기기 시작":"테스트 시작"}</button></div>`;
+}
+function cardFace(it){
+  if(isVocab(it))return{f:`<div class="w">${esc(it.en)}</div>`,b:`<div class="w" style="font-size:clamp(28px,8vw,40px)">${esc(it.ko)}</div><div class="k">${esc(it.en)}</div>`,say:it.en};
+  const sub=it.deck==="comp"?`<div class="k">최상급 ${esc(it.sup)}</div>`:"";
+  return{f:`<div class="w">${esc(it.base)}</div><div class="k">${esc(it.ko)} · ${it.deck==="past"?"과거형은?":"비교급은?"}</div>`,b:`<div class="w">${esc(it.form)}</div>${sub}<div class="k">${esc(rule(it))}</div>`,say:it.deck==="past"?it.base+", "+it.form:it.base+", "+it.form};
+}
+function viewStudy(){
+  if(S.i>=S.cards.length){
+    return`<div class="ring"><span class="kind">카드 학습 끝</span><div class="w" style="font-size:40px">알아요 ${S.known} · 몰라요 ${S.unknown.length}</div><p class="k">몰라요 카드는 오답노트에 들어갔어요.</p></div>
+    <div class="bar"><button class="big alt" id="home">홈</button>${S.unknown.length?`<button class="big" id="again">몰라요만 다시</button>`:`<button class="big" id="totest">테스트 보기</button>`}</div>`;
+  }
+  const it=S.cards[S.i],c=cardFace(it),sp="";
+  return`${head(S.i+1,S.cards.length)}
+  <div class="flash ${S.flip?"on":""}" id="card"><div class="inner"><div class="face">${c.f}${sp}<div class="tip">탭해서 뒤집기 · 옆으로 밀어서 넘기기</div></div><div class="face back">${c.b}</div></div></div>
+  <div class="bar"><button class="big no" id="no">몰라요</button><button class="big" id="yes">알아요</button></div>`;
+}
+function viewQuiz(){
+  const q=S.qs[S.i],r=S.res[S.i];
+  const sp="";
+  let body="";
+  if(q.type==="mc"){
+    const two=q.opts.every(o=>o.length<=12);
+    body=`<div class="opts ${two?"two":""}">${q.opts.map((o,i)=>{let c="";if(r){if(o===q.ans)c="ok";else if(o===r.given)c="bad"}return`<button class="opt ${c}" data-i="${i}" ${r?"disabled":""}>${esc(o)}</button>`}).join("")}</div>`;
+  }else{
+    body=`<form id="tf"><input class="ans ${r?(r.ok?"ok":"bad"):""}" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="영어로 쓰기" value="${r?esc(r.given):""}" ${r?"readonly":""}></form>`;
+  }
+  const rl=rule(q.it);
+  const fb=r?`<div class="fb ${r.ok?"ok":"bad"}"><b>${r.ok?"정답!":"아쉬워요"}</b> ${esc(q.show)}${rl?`<small>${esc(rl)}</small>`:""}</div>`:"";
+  const btn=r?`<button class="big" id="next">${S.i+1<S.qs.length?"다음 문제":"결과 보기"}</button>`:(q.type==="type"?`<button class="big" id="check">확인</button>`:`<button class="big alt" disabled>정답을 골라 보세요</button>`);
+  return`${head(S.i+1,S.qs.length)}
+  <div class="ring"><span class="kind">${esc(q.label)}</span><div class="w">${esc(q.prompt)}</div>${q.sub?`<div class="k">${esc(q.sub)}</div>`:""}${q.hint&&!r?`<div class="hint">${esc(q.hint)}</div>`:""}${sp}</div>
+  ${body}${fb}<div class="bar">${btn}</div>`;
+}
+function viewResult(){
+  const ok=S.res.filter(r=>r.ok).length,t=S.res.length,p=t?ok/t:0,C=2*Math.PI*52;
+  const msg=p===1?"완벽해요! 다 맞혔어요.":p>=.8?"아주 잘했어요. 틀린 것만 한 번 더!":p>=.5?"좋아요. 오답노트로 다시 연습해요.":"괜찮아요. 카드 학습부터 다시 해 봐요.";
+  const wrong=S.res.filter(r=>!r.ok);
+  return`<div class="ring"><div class="score"><svg viewBox="0 0 120 120" role="img" aria-label="${ok} / ${t}"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--panel)" stroke-width="14"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--acc)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${C*p} ${C}" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" font-family="Jua,sans-serif" font-size="28" fill="var(--ink)">${ok}/${t}</text></svg><div style="text-align:left"><h2>${Math.round(p*100)}점</h2><p>${msg}</p></div></div></div>
+  ${wrong.length?`<div class="lab">틀린 문제</div><ul class="list">${wrong.map(r=>`<li><span>${esc(r.q.prompt)}</span><span><s>${esc(r.given||"(빈칸)")}</s> → <b>${esc(r.q.ans)}</b></span></li>`).join("")}</ul>`:""}
+  <div class="bar"><button class="big alt" id="home">홈</button>${wrong.length?`<button class="big" id="retry">틀린 것만 다시</button>`:`<button class="big" id="again2">한 번 더</button>`}</div>`;
+}
+
+function answer(given){
+  const q=S.qs[S.i];if(S.res[S.i])return;
+  const ok=norm(given)===norm(q.ans);
+  S.res[S.i]={q,given,ok};
+  if(ok)delete store.wrong[q.it.id];else store.wrong[q.it.id]=(store.wrong[q.it.id]||0)+1;
+  save();buzz(ok?30:[60,40,60]);render();
+  const n=document.getElementById("next");if(n)n.focus({preventScroll:true});
+}
+function next(){
+  if(S.i+1<S.qs.length){S.i++;render();const a=document.getElementById("ans");if(a)a.focus()}
+  else{const ok=S.res.filter(r=>r.ok).length;store.last[S.deck]={s:ok,t:S.res.length,d:Date.now()};save();S.view="result";render();scrollTo(0,0)}
+}
+function studyMark(known){
+  const it=S.cards[S.i];
+  if(known)S.known++;else{S.unknown.push(it);store.wrong[it.id]=(store.wrong[it.id]||0)+1;save()}
+  S.i++;S.flip=false;render();
+}
+
+function render(){
+  app.innerHTML=S.view==="home"?viewHome():S.view==="study"?viewStudy():S.view==="quiz"?viewQuiz():viewResult();
+  bind();
+}
+function bind(){
+  const $=id=>document.getElementById(id);
+  const on=(id,f)=>{const e=$(id);if(e)e.addEventListener("click",f)};
+  on("home",()=>{S.view="home";if(S.deck==="wrong"&&!wrongItems().length)S.deck="l7";render()});
+  app.querySelectorAll("[data-deck]").forEach(b=>b.addEventListener("click",()=>{S.deck=b.dataset.deck;render()}));
+  app.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{const g=b.parentNode.dataset.g;S[g]=g==="count"?+b.dataset.v:b.dataset.v;render()}));
+  const irr=$("irr");if(irr)irr.addEventListener("change",()=>{S.irr=irr.checked});
+  on("go",()=>start(pool()));
+  on("yes",()=>studyMark(true));on("no",()=>studyMark(false));
+  on("again",()=>start(shuffle(S.unknown)));
+  on("totest",()=>{S.mode="test";start(shuffle(S.cards))});
+  on("retry",()=>{S.mode="test";start(shuffle(S.res.filter(r=>!r.ok).map(r=>r.q.it)))});
+  on("again2",()=>start(pool()));
+  on("next",next);
+  on("check",()=>answer($("ans").value));
+  const tf=$("tf");if(tf)tf.addEventListener("submit",e=>{e.preventDefault();if(S.res[S.i])next();else answer($("ans").value)});
+  app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>answer(S.qs[S.i].opts[+b.dataset.i])));
+  const card=$("card");
+  if(card){
+    let x0=null,dx=0;const inner=card.firstElementChild;
+    card.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;x0=e.clientX;dx=0});
+    card.addEventListener("pointermove",e=>{if(x0===null)return;dx=e.clientX-x0;if(Math.abs(dx)>8)card.style.transform=`translateX(${dx}px) rotate(${dx/30}deg)`});
+    const end=()=>{if(x0===null)return;card.style.transform="";if(dx>80)studyMark(true);else if(dx<-80)studyMark(false);else if(Math.abs(dx)<8){S.flip=!S.flip;card.classList.toggle("on",S.flip)}x0=null};
+    card.addEventListener("pointerup",end);card.addEventListener("pointercancel",()=>{x0=null;card.style.transform=""});
+  }
+}
+document.addEventListener("keydown",e=>{
+  if(S.view==="quiz"){
+    const q=S.qs[S.i];
+    if(e.key==="Enter"&&S.res[S.i]&&e.target.id!=="ans"){e.preventDefault();next()}
+    else if(q.type==="mc"&&!S.res[S.i]&&/^[1-4]$/.test(e.key))answer(q.opts[+e.key-1]);
+  }else if(S.view==="study"&&S.i<S.cards.length){
+    if(e.key===" "){e.preventDefault();S.flip=!S.flip;document.getElementById("card").classList.toggle("on",S.flip)}
+    else if(e.key==="ArrowRight")studyMark(true);else if(e.key==="ArrowLeft")studyMark(false);
+  }
+});
+render();
+}
+</script>
+</body>
+</html>
