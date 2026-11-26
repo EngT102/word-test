@@ -131,6 +131,12 @@ const KEY="vt-l78-v1";
 let store={wrong:{},last:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")store={wrong:s.wrong||{},last:s.last||{}}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+// 선생님 기기 표시: 주소 끝에 ?teacher=1 로 한 번 열면 그 기기에 저장, ?teacher=0 이면 해제
+const TKEY="vt-teacher";
+try{const t=new URLSearchParams(location.search).get("teacher");
+  if(t==="1")localStorage.setItem(TKEY,"1");else if(t==="0")localStorage.removeItem(TKEY);
+  if(t!==null)history.replaceState(null,"",location.pathname)}catch(e){}
+const TEACHER=(()=>{try{return localStorage.getItem(TKEY)==="1"}catch(e){return false}})();
 
 const SHEET_URL="https://script.google.com/macros/s/AKfycbxTPy0jcnacJhACZGrLmvwKITYCkvfO_6dKUhxpl7bohNRkkXICNMHp3i-ttRyl7r2Dnw/exec";
 const QKEY="vt-l78-queue";
@@ -147,7 +153,7 @@ async function flush(){
   flushing=false;
 }
 function report(mode,score,total,wrong){
-  const deck=(S.deck==="wrong"?"오답노트":DECKS[S.deck].name)+(S.irr&&(S.deck==="past"||S.deck==="comp")?" (불규칙만)":"");
+  const deck=(TEACHER?"[선생님] ":"")+(S.deck==="wrong"?"오답노트":DECKS[S.deck].name)+(S.irr&&(S.deck==="past"||S.deck==="comp")?" (불규칙만)":"");
   const q=readQ();q.push({t:Date.now(),deck,mode,score,total,wrong});writeQ(q);flush();
 }
 const isGram=it=>it.s!==undefined;
@@ -233,7 +239,7 @@ function viewHome(){
   <div class="lab">개수</div>
   <div class="seg" data-g="count">${[[10,"10개"],[20,"20개"],[0,"전체"]].map(([v,t])=>`<button data-v="${v}" aria-pressed="${S.count===v}">${t}</button>`).join("")}</div>
   ${S.deck==="past"||S.deck==="comp"?`<label class="tog"><input type="checkbox" id="irr" ${S.irr?"checked":""}> ★ 불규칙만 연습하기</label>`:""}
-  <p class="note">테스트 결과는 선생님께 자동으로 전달돼요.</p>
+  <p class="note">${TEACHER?"선생님 기기예요 · 시트에 [선생님] 표시로 기록돼요.":"테스트 결과는 선생님께 자동으로 전달돼요."}</p>
   <div class="bar"><button class="big" id="go">${S.mode==="study"?"카드 넘기기 시작":"테스트 시작"}</button></div>`;
 }
 function cardFace(it){
