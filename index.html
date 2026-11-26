@@ -230,9 +230,10 @@ function viewHome(){
   const wn=wrongItems().length;
   const deckBtn=k=>{const d=DECKS[k],l=store.last[k];return`<button class="deck" data-deck="${k}" aria-pressed="${S.deck===k}"><b>${d.name}</b><small>${esc(d.sub)} · ${d.items.length}개</small><span class="last">${l?"최근 "+l.s+" / "+l.t:"아직 기록 없음"}</span></button>`};
   const l=store.last.wrong;
-  const gk=Object.keys(G);
+  const gk=Object.keys(G).filter(k=>!G[k].sec),tk=Object.keys(G).filter(k=>G[k].sec);
   return`<div class="decks">${["l7","l8","past","comp"].map(deckBtn).join("")}</div>
-  ${gk.length?`<div class="lab">어법</div><div class="decks">${gk.map(deckBtn).join("")}</div>`:""}<div class="decks" style="margin-top:12px">
+  ${gk.length?`<div class="lab">어법</div><div class="decks">${gk.map(deckBtn).join("")}</div>`:""}
+  ${tk.length?`<div class="lab">교과서 본문</div><div class="decks" style="grid-template-columns:1fr">${tk.map(deckBtn).join("")}</div>`:""}<div class="decks" style="margin-top:12px">
   <button class="deck wrong" data-deck="wrong" aria-pressed="${S.deck==="wrong"}" ${wn?"":"disabled"}><span><b>오답노트</b><br><small>${wn?"틀린 문제 "+wn+"개 · 맞히면 빠져요":"틀린 단어·어법 문제가 여기에 모여요"}</small></span><span class="last">${l?"최근 "+l.s+" / "+l.t:""}</span></button></div>
   <div class="lab">무엇을 할까요?</div>
   <div class="seg" data-g="mode"><button data-v="study" aria-pressed="${S.mode==="study"}">카드 학습</button><button data-v="test" aria-pressed="${S.mode==="test"}">테스트</button></div>
