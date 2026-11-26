@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>L7–8 단어 테스트</title>
+<title>L7–8 단어·어법 테스트</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -92,6 +92,13 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-of
 .score h2{font:400 30px/1.1 Jua,sans-serif;margin:0}
 .score p{margin:6px 0 0;color:var(--soft)}
 .list{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.sen{font:500 clamp(19px,5.4vw,23px)/1.45 "Noto Sans KR",sans-serif;text-align:left;overflow-wrap:anywhere}
+.sen u{text-decoration-color:var(--acc);text-decoration-thickness:3px;text-underline-offset:4px;font-weight:700}
+.sen .bl{display:inline-block;min-width:3.2em;border-bottom:3px solid var(--acc);margin:0 2px}
+.qq{font-weight:700;color:var(--blue);margin-top:10px;text-align:left}
+.face .sen,.face .qq{text-align:center}
+.ex{display:block;margin-top:6px;font-weight:400;color:var(--ink);opacity:.85}
+.opt.long{font-size:16px;text-align:left}
 .list li{background:var(--panel);border-radius:14px;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .list b{color:var(--ok)}
 .list s{color:var(--bad)}
@@ -99,8 +106,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-of
 </style>
 </head>
 <body>
-<header class="top"><div><h1>L7–8 단어 테스트</h1><p>동아출판(이병민) 중1 · Lesson 7–8</p></div></header>
+<header class="top"><div><h1>L7–8 단어·어법 테스트</h1><p>동아출판(이병민) 중1 · Lesson 7–8</p></div></header>
 <main class="wrap" id="app"></main>
+<script src="grammar.js"></script>
 <script>
 {
 const L7=[["artist","화가"],["self-portrait","자화상"],["Dutch","네덜란드의"],["famous","유명한"],["lifetime","일생, 평생"],["move","이사하다"],["model","모델"],["expensive","비싼"],["different","다른"],["bright","밝은"],["Mexican","멕시코의"],["sick","아픈"],["weak","약한"],["strong","강한"],["get well","(병이) 낫다"],["terrible","끔찍한"],["accident","사고"],["hospital","병원"],["reason","이유"],["in common","공통으로"],["touch","(마음을) 움직이다"],["heart","마음, 심장"],["anyone","누구, 누구나"],["paint","그리다"]];
@@ -114,6 +122,8 @@ const DECKS={
   past:{name:"과거형 동사",sub:"think → thought",items:PAST.map((r,i)=>({id:"pa-"+i,deck:"past",base:r[0],form:r[1],ko:r[2],irr:!!r[3],traps:r[4]}))},
   comp:{name:"비교급",sub:"bright → brighter",items:COMP.map((r,i)=>({id:"co-"+i,deck:"comp",base:r[0],form:r[1],sup:r[2],ko:r[3],irr:!!r[4],traps:r[5]}))}
 };
+const G=window.GRAMMAR||{};
+for(const k in G)DECKS[k]={name:G[k].name,sub:G[k].sub,items:G[k].rows.map((r,i)=>({id:k+"-"+i,deck:k,kind:r[0],s:r[1],q:r[2],a:r[3],wr:r[4],ex:r[5]}))};
 const BYID={};
 for(const k in DECKS)for(const it of DECKS[k].items)BYID[it.id]=it;
 
@@ -140,17 +150,21 @@ function report(mode,score,total,wrong){
   const deck=(S.deck==="wrong"?"오답노트":DECKS[S.deck].name)+(S.irr&&(S.deck==="past"||S.deck==="comp")?" (불규칙만)":"");
   const q=readQ();q.push({t:Date.now(),deck,mode,score,total,wrong});writeQ(q);flush();
 }
-const label=it=>it.en?it.en+" ("+it.ko+")":it.base+" → "+it.form;
+const isGram=it=>it.s!==undefined;
+const plain=s=>String(s).replace(/\*/g,"");
+const label=it=>it.en?it.en+" ("+it.ko+")":isGram(it)?(it.s?plain(it.s)+" / ":"")+it.q+" → "+it.a:it.base+" → "+it.form;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const norm=s=>String(s).toLowerCase().replace(/[’‘]/g,"'").replace(/[.!?,]/g,"").replace(/\s+/g," ").trim();
 const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 const isVocab=it=>it.deck==="l7"||it.deck==="l8";
+const senHTML=s=>esc(s).replace(/\*(.+?)\*/g,"<u>$1</u>").replace(/___/g,'<span class="bl"></span>');
 const wrongItems=()=>Object.keys(store.wrong).map(id=>BYID[id]).filter(Boolean);
 
 
 function rule(it){
   if(isVocab(it))return "";
+  if(isGram(it))return it.ex;
   const b=it.base,f=it.form;
   if(it.irr)return "불규칙 — 통째로 외우기";
   if(it.deck==="past"){
@@ -176,6 +190,7 @@ function traps(it){
 function hintOf(w){return w.split("").map((ch,i)=>i===0||ch===" "||ch==="-"?ch:"_").join(" ")}
 function makeQ(it){
   const r=Math.random();
+  if(isGram(it))return{it,type:"mc",gram:1,label:it.kind,prompt:it.s?plain(it.s):it.q,opts:shuffle([it.a,...it.wr]),ans:it.a,show:"정답: "+it.a};
   if(isVocab(it)){
     const others=shuffle(DECKS[it.deck].items.filter(x=>x.id!==it.id)).slice(0,3);
     if(r<.4)return{it,type:"mc",label:"뜻 고르기",prompt:it.en,speak:it.en,opts:shuffle([it.ko,...others.map(o=>o.ko)]),ans:it.ko,show:it.en+" = "+it.ko};
@@ -209,8 +224,10 @@ function viewHome(){
   const wn=wrongItems().length;
   const deckBtn=k=>{const d=DECKS[k],l=store.last[k];return`<button class="deck" data-deck="${k}" aria-pressed="${S.deck===k}"><b>${d.name}</b><small>${esc(d.sub)} · ${d.items.length}개</small><span class="last">${l?"최근 "+l.s+" / "+l.t:"아직 기록 없음"}</span></button>`};
   const l=store.last.wrong;
-  return`<div class="decks">${["l7","l8","past","comp"].map(deckBtn).join("")}
-  <button class="deck wrong" data-deck="wrong" aria-pressed="${S.deck==="wrong"}" ${wn?"":"disabled"}><span><b>오답노트</b><br><small>${wn?"틀린 단어 "+wn+"개 · 맞히면 빠져요":"틀린 단어가 여기에 모여요"}</small></span><span class="last">${l?"최근 "+l.s+" / "+l.t:""}</span></button></div>
+  const gk=Object.keys(G);
+  return`<div class="decks">${["l7","l8","past","comp"].map(deckBtn).join("")}</div>
+  ${gk.length?`<div class="lab">어법</div><div class="decks">${gk.map(deckBtn).join("")}</div>`:""}<div class="decks" style="margin-top:12px">
+  <button class="deck wrong" data-deck="wrong" aria-pressed="${S.deck==="wrong"}" ${wn?"":"disabled"}><span><b>오답노트</b><br><small>${wn?"틀린 문제 "+wn+"개 · 맞히면 빠져요":"틀린 단어·어법 문제가 여기에 모여요"}</small></span><span class="last">${l?"최근 "+l.s+" / "+l.t:""}</span></button></div>
   <div class="lab">무엇을 할까요?</div>
   <div class="seg" data-g="mode"><button data-v="study" aria-pressed="${S.mode==="study"}">카드 학습</button><button data-v="test" aria-pressed="${S.mode==="test"}">테스트</button></div>
   <div class="lab">개수</div>
@@ -220,6 +237,7 @@ function viewHome(){
   <div class="bar"><button class="big" id="go">${S.mode==="study"?"카드 넘기기 시작":"테스트 시작"}</button></div>`;
 }
 function cardFace(it){
+  if(isGram(it))return{f:`<span class="kind">${esc(it.kind)}</span>${it.s?`<div class="sen">${senHTML(it.s)}</div>`:""}<div class="qq">${esc(it.q)}</div>`,b:`<div class="sen" style="text-align:center"><b>${esc(it.a)}</b></div><div class="k" style="font-size:15px">${esc(it.ex)}</div>`};
   if(isVocab(it))return{f:`<div class="w">${esc(it.en)}</div>`,b:`<div class="w" style="font-size:clamp(28px,8vw,40px)">${esc(it.ko)}</div><div class="k">${esc(it.en)}</div>`,say:it.en};
   const sub=it.deck==="comp"?`<div class="k">최상급 ${esc(it.sup)}</div>`:"";
   return{f:`<div class="w">${esc(it.base)}</div><div class="k">${esc(it.ko)} · ${it.deck==="past"?"과거형은?":"비교급은?"}</div>`,b:`<div class="w">${esc(it.form)}</div>${sub}<div class="k">${esc(rule(it))}</div>`,say:it.deck==="past"?it.base+", "+it.form:it.base+", "+it.form};
@@ -239,16 +257,17 @@ function viewQuiz(){
   const sp="";
   let body="";
   if(q.type==="mc"){
-    const two=q.opts.every(o=>o.length<=12);
-    body=`<div class="opts ${two?"two":""}">${q.opts.map((o,i)=>{let c="";if(r){if(o===q.ans)c="ok";else if(o===r.given)c="bad"}return`<button class="opt ${c}" data-i="${i}" ${r?"disabled":""}>${esc(o)}</button>`}).join("")}</div>`;
+    const two=q.opts.every(o=>o.length<=12),lg=q.opts.some(o=>o.length>16);
+    body=`<div class="opts ${two?"two":""}">${q.opts.map((o,i)=>{let c=lg?"long":"";if(r){if(o===q.ans)c+=" ok";else if(o===r.given)c+=" bad"}return`<button class="opt ${c}" data-i="${i}" ${r?"disabled":""}>${esc(o)}</button>`}).join("")}</div>`;
   }else{
     body=`<form id="tf"><input class="ans ${r?(r.ok?"ok":"bad"):""}" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="영어로 쓰기" value="${r?esc(r.given):""}" ${r?"readonly":""}></form>`;
   }
   const rl=rule(q.it);
   const fb=r?`<div class="fb ${r.ok?"ok":"bad"}"><b>${r.ok?"정답!":"아쉬워요"}</b> ${esc(q.show)}${rl?`<small>${esc(rl)}</small>`:""}</div>`:"";
+  const top=q.gram?`${q.it.s?`<div class="sen">${senHTML(q.it.s)}</div>`:""}<div class="qq">${esc(q.it.q)}</div>`:`<div class="w">${esc(q.prompt)}</div>${q.sub?`<div class="k">${esc(q.sub)}</div>`:""}${q.hint&&!r?`<div class="hint">${esc(q.hint)}</div>`:""}`;
   const btn=r?`<button class="big" id="next">${S.i+1<S.qs.length?"다음 문제":"결과 보기"}</button>`:(q.type==="type"?`<button class="big" id="check">확인</button>`:`<button class="big alt" disabled>정답을 골라 보세요</button>`);
   return`${head(S.i+1,S.qs.length)}
-  <div class="ring"><span class="kind">${esc(q.label)}</span><div class="w">${esc(q.prompt)}</div>${q.sub?`<div class="k">${esc(q.sub)}</div>`:""}${q.hint&&!r?`<div class="hint">${esc(q.hint)}</div>`:""}${sp}</div>
+  <div class="ring"><span class="kind">${esc(q.label)}</span>${top}${sp}</div>
   ${body}${fb}<div class="bar">${btn}</div>`;
 }
 function viewResult(){
