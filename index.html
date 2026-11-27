@@ -297,7 +297,7 @@ function answer(given){
 function next(){
   if(S.i+1<S.qs.length){S.i++;render();const a=document.getElementById("ans");if(a)a.focus()}
   else{const ok=S.res.filter(r=>r.ok).length;store.last[S.deck]={s:ok,t:S.res.length,d:Date.now()};save();
-    report("테스트",ok,S.res.length,S.res.filter(r=>!r.ok).map(r=>({w:label(r.q.it),d:DECKS[r.q.it.deck].name,g:r.q.type==="type"?(r.given||"빈칸"):r.given})));
+    report(S.retry||S.deck==="wrong"?"다시 풀기":"테스트",ok,S.res.length,S.res.filter(r=>!r.ok).map(r=>({w:label(r.q.it),d:DECKS[r.q.it.deck].name,g:r.q.type==="type"?(r.given||"빈칸"):r.given})));
     S.view="result";render();scrollTo(0,0)}
 }
 function studyMark(known){
@@ -319,12 +319,12 @@ function bind(){
   app.querySelectorAll("[data-deck]").forEach(b=>b.addEventListener("click",()=>{S.deck=b.dataset.deck;render()}));
   app.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{const g=b.parentNode.dataset.g;S[g]=g==="count"?+b.dataset.v:b.dataset.v;render()}));
   const irr=$("irr");if(irr)irr.addEventListener("change",()=>{S.irr=irr.checked});
-  on("go",()=>start(pool()));
+  on("go",()=>{S.retry=false;start(pool())});
   on("yes",()=>studyMark(true));on("no",()=>studyMark(false));
   on("again",()=>start(shuffle(S.unknown)));
-  on("totest",()=>{S.mode="test";start(shuffle(S.cards))});
-  on("retry",()=>{S.mode="test";start(shuffle(S.res.filter(r=>!r.ok).map(r=>r.q.it)))});
-  on("again2",()=>start(pool()));
+  on("totest",()=>{S.mode="test";S.retry=false;start(shuffle(S.cards))});
+  on("retry",()=>{S.mode="test";S.retry=true;start(shuffle(S.res.filter(r=>!r.ok).map(r=>r.q.it)))});
+  on("again2",()=>{S.retry=false;start(pool())});
   on("next",next);
   on("check",()=>answer($("ans").value));
   const tf=$("tf");if(tf)tf.addEventListener("submit",e=>{e.preventDefault();if(S.res[S.i])next();else answer($("ans").value)});
